@@ -10,6 +10,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from .system_certs import install as _install_system_certs
+
 # yt-dlp's YouTube challenge solver (#432, #438).
 #
 # Vendored rather than declared as a dependency, and the reason is the desktop
@@ -29,3 +31,7 @@ if _VENDOR.is_dir():
     _path = str(_VENDOR)
     if _path not in sys.path:
         sys.path.insert(0, _path)
+
+# Before any submodule imports yt-dlp or requests. No-op in the desktop
+# package and under pytest; see app/system_certs.py.
+_install_system_certs()

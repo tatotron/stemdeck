@@ -96,6 +96,10 @@ dependencies = [
     # own cuBLAS/cuDNN requirement. Word timestamps come from word_timestamps=True.
     # Model weights are downloaded on first use, never bundled.
     "openai-whisper>=20250625",
+    # OS certificate store for SSL-inspecting networks. Injected only from a
+    # source checkout (or STEMDECK_TRUST_SYSTEM_CERTS=1); see app/system_certs.py.
+    # Verification stays on. The desktop package does not inject unless asked.
+    "truststore>=0.10.4",
 ]
 
 [project.optional-dependencies]
