@@ -313,6 +313,42 @@ def set_auto_sections(value: bool) -> bool:
         return bool(value)
 
 
+def get_playalong() -> bool:
+    """Transcribe the next import for the Sheet panel. Off until asked, and
+    the page clears it on load, the same way song structure works."""
+    with _LOCK:
+        v = _ensure().get("playalong")
+        return v if isinstance(v, bool) else False
+
+
+def set_playalong(value: bool) -> bool:
+    with _LOCK:
+        _ensure()["playalong"] = bool(value)
+        _save()
+        return bool(value)
+
+
+_PLAYALONG_LANGUAGES = ("auto", "pt", "es", "en")
+
+
+def get_playalong_language() -> str:
+    """Language forced on a play-along transcription. ``auto`` lets Whisper
+    decide. A stored value outside the list reads as auto."""
+    with _LOCK:
+        v = _ensure().get("playalong_language")
+        return v if isinstance(v, str) and v in _PLAYALONG_LANGUAGES else "auto"
+
+
+def set_playalong_language(value: str) -> str:
+    from app.pipeline.playalong import normalize_language
+
+    choice = normalize_language(value)
+    with _LOCK:
+        _ensure()["playalong_language"] = choice
+        _save()
+        return choice
+
+
 def _default_auto_delete_days() -> int:
     """Honour a STEMDECK_JOB_TTL_SECONDS somebody already tuned.
 

@@ -1,0 +1,161 @@
+/* Sheet panel. Fixed so it can sit over the mixer at 1366×768 and close
+   without the composer grid having to grow a column for it. The two lyric
+   slots always keep a chord gutter above them, empty until chords land. */
+
+.daw-composer-stack .sheet-open-btn {
+  height: 26px;
+  justify-content: center;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+.daw-composer-stack .sheet-open-btn:hover { background: var(--panel-2); }
+.daw-composer-stack .sheet-open-btn[aria-pressed="true"] {
+  color: #1a1a1a;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.daw-composer-stack .sheet-open-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sheet-panel {
+  position: fixed;
+  z-index: 60;
+  top: 112px;
+  right: 12px;
+  width: min(640px, calc(100vw - 24px));
+  max-height: calc(100vh - 128px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 16px;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+.sheet-panel[hidden] { display: none; }
+
+.sheet-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.sheet-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+.sheet-language {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.sheet-language select {
+  font: inherit;
+  color: var(--fg);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+.sheet-import,
+.sheet-transcribe,
+.sheet-close {
+  font: inherit;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+.sheet-import,
+.sheet-transcribe { padding: 4px 10px; }
+.sheet-import[aria-pressed="true"] {
+  color: #1a1a1a;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.sheet-transcribe { margin-left: auto; }
+.sheet-close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+.sheet-import:disabled,
+.sheet-transcribe:disabled,
+.sheet-language select:disabled { opacity: 0.5; cursor: default; }
+.sheet-import:focus-visible,
+.sheet-transcribe:focus-visible,
+.sheet-close:focus-visible,
+.sheet-language select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sheet-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sheet-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow: auto;
+}
+.sheet-chords {
+  min-height: 1.5em;
+  margin: 0 0 2px;
+}
+.sheet-slot-next .sheet-chords { min-height: 1.15em; }
+.sheet-line {
+  margin: 0;
+  cursor: pointer;
+}
+.sheet-slot-current .sheet-line {
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--fg);
+}
+.sheet-slot-next .sheet-line {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.sheet-word { white-space: pre-wrap; }
+.sheet-slot-current .sheet-word.sung { color: var(--accent); }
+.sheet-slot-current .sheet-word.singing {
+  color: transparent;
+  background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--fg) var(--fill, 0%));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@media (max-width: 1366px), (max-height: 768px) {
+  .sheet-panel { top: 96px; max-height: calc(100vh - 108px); }
+  .sheet-slot-current .sheet-line { font-size: 28px; }
+}

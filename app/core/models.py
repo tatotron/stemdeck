@@ -247,6 +247,15 @@ class Job:
     # submit, and the toggle is a per-import choice that clears itself: reading
     # it late let a job lose a pass the user had asked and waited for.
     auto_sections: bool = False
+    # Play-along lyrics, captured with auto_sections: the toggle is a choice
+    # about the next import and clears when the page loads, so reading it when
+    # the stage is reached would drop a pass the user had already asked for.
+    # The language is the one selected then (auto, pt, es, en). Status is the
+    # import pass or the button on a finished track; a failure stays "error"
+    # and leaves stems and any lyrics.json that was already saved.
+    playalong: bool = False
+    playalong_language: str = "auto"
+    playalong_status: Literal["none", "running", "done", "error", "skipped"] = "none"
     sections_source: Literal["automatic", "manual"] | None = None
     tags: list[str] | None = None  # YouTube tags + categories, lowercased, max 8
     stems: list[dict[str, str]] = field(default_factory=list)
@@ -406,6 +415,7 @@ class Job:
             "gpu_fallback": self.gpu_fallback,
             "stage_timings": self.stage_timings,
             "vocal_split": self.vocal_split,
+            "playalong_status": self.playalong_status,
             "trashed_at": self.trashed_at,
             "favorite": self.favorite,
             "created_at": self.created_at,

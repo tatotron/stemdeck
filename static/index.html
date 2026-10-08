@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/variables.css" />
     <link rel="stylesheet" href="/css/waves.css" />
     <link rel="stylesheet" href="/css/daw.css" />
+    <link rel="stylesheet" href="/css/playalong.css" />
   </head>
   <body>
 
@@ -262,6 +263,13 @@
           <button class="daw-panel-toggle" type="button" data-panel="sections" aria-pressed="true"
                   title="Show or hide the sections bar" data-i18n-title="panels.sectionsTitle" data-i18n-aria-label="panels.sectionsTitle">
             <span data-i18n="sections.title">Sections</span>
+          </button>
+          <!-- Not a Collapse toggle: it opens the Sheet panel, it does not
+               hide a studio panel. type="button" because this is inside the
+               import form. -->
+          <button class="sheet-open-btn" type="button" id="sheetToggle" aria-pressed="false" aria-controls="sheetPanel"
+                  title="Open the sheet: the current line and the next one, following playback" data-i18n-title="sheet.toggleTitle" data-i18n-aria-label="sheet.toggleAria">
+            <span data-i18n="sheet.toggle">Sheet</span>
           </button>
         </div>
 
@@ -1241,6 +1249,37 @@
         </div>
       </div>
     </div>
+
+    <aside class="sheet-panel" id="sheetPanel" hidden aria-labelledby="sheetTitle">
+      <div class="sheet-bar">
+        <h2 class="sheet-title" id="sheetTitle" data-i18n="sheet.title">Sheet</h2>
+        <label class="sheet-language">
+          <span data-i18n="sheet.language">Language</span>
+          <select id="sheetLanguage" aria-label="Transcription language" data-i18n-aria-label="sheet.languageAria">
+            <option value="auto" data-i18n="sheet.lang.auto">Auto</option>
+            <option value="pt" data-i18n="sheet.lang.pt">Portuguese</option>
+            <option value="es" data-i18n="sheet.lang.es">Spanish</option>
+            <option value="en" data-i18n="sheet.lang.en">English</option>
+          </select>
+        </label>
+        <button class="sheet-import" type="button" id="sheetImportToggle" aria-pressed="false" title="Transcribe the next import when it has no synced lyrics. Turns off when you reload the page." data-i18n-title="sheet.importTitle">
+          <span data-i18n="sheet.import">Next import</span>
+        </button>
+        <button class="sheet-transcribe" type="button" id="sheetTranscribe" data-i18n="sheet.transcribe">Transcribe</button>
+        <button class="sheet-close" type="button" id="sheetClose" aria-label="Close sheet" data-i18n-aria-label="sheet.close">&times;</button>
+      </div>
+      <p class="sheet-status" id="sheetStatus" aria-live="polite"></p>
+      <div class="sheet-stage">
+        <div class="sheet-slot sheet-slot-current">
+          <div class="sheet-chords" aria-hidden="true"></div>
+          <p class="sheet-line" id="sheetCurrent"></p>
+        </div>
+        <div class="sheet-slot sheet-slot-next">
+          <div class="sheet-chords" aria-hidden="true"></div>
+          <p class="sheet-line" id="sheetNext"></p>
+        </div>
+      </div>
+    </aside>
 
     <!-- First, so its handlers are installed before main.js is evaluated and
          can report a failure to parse, resolve an import, or wire the UI. -->

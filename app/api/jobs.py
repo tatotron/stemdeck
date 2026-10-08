@@ -53,6 +53,8 @@ from app.core.settings import (
     get_auto_sections,
     get_discogs_token,
     get_max_duration_sec,
+    get_playalong,
+    get_playalong_language,
 )
 from app.core.stems_location import is_relocating
 from app.pipeline import discogs, jobqueue
@@ -263,6 +265,8 @@ async def _create_youtube_job(request: Request) -> dict[str, str]:
         # last thing the pipeline does, and the toggle clears itself as soon
         # as the user opens another song.
         auto_sections=get_auto_sections(),
+        playalong=get_playalong(),
+        playalong_language=get_playalong_language(),
     )
     if not registry_register_if_capacity(job, MAX_PENDING_URL_JOBS):
         raise HTTPException(status_code=503, detail=_URL_QUEUE_FULL_DETAIL)
@@ -362,6 +366,8 @@ async def _create_local_job(request: Request) -> dict[str, str]:
         source_format=ext.removeprefix("."),
         audio_tags=audio_tags,
         auto_sections=get_auto_sections(),
+        playalong=get_playalong(),
+        playalong_language=get_playalong_language(),
     )
     if not registry_register_if_capacity(job, MAX_PENDING_UPLOAD_JOBS):
         shutil.rmtree(job_dir, ignore_errors=True)
@@ -675,6 +681,8 @@ async def resplit_job(job_id: str, body: ResplitBody) -> dict:
         work=job.work,
         has_lyrics=has_lyrics,
         auto_sections=get_auto_sections(),
+        playalong=get_playalong(),
+        playalong_language=get_playalong_language(),
     )
     if not registry_register_if_capacity(new_job, MAX_PENDING_UPLOAD_JOBS):
         shutil.rmtree(new_dir, ignore_errors=True)

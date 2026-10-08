@@ -27,6 +27,7 @@ const HELP = [
   ['.vocal-mode-btn[data-mode="all"]', "help.vocalCombined"],
   ['.vocal-mode-btn[data-mode="split"]', "help.vocalSplit"],
   ["#autoSectionsBtn", "help.detectStructure"],
+  ["#sheetToggle", "help.sheet"],
   ['.daw-panel-toggle[data-panel="analysis"]', "help.analysisToggle"],
   ['.daw-panel-toggle[data-panel="sections"]', "help.sectionsToggle"],
   ["#submit", "help.extract"],

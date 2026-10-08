@@ -67,6 +67,8 @@ from app.core.settings import (
     get_export_sample_rate,
     get_jobs_dir,
     get_max_duration_sec,
+    get_playalong,
+    get_playalong_language,
     get_playlist_max_items,
     get_port,
     get_separation_quality,
@@ -83,6 +85,8 @@ from app.core.settings import (
     set_export_sample_rate,
     set_jobs_dir,
     set_max_duration_sec,
+    set_playalong,
+    set_playalong_language,
     set_playlist_max_items,
     set_port,
     set_separation_quality,
@@ -361,6 +365,10 @@ def _settings_payload() -> dict[str, object]:
         # job and produces suggestions rather than ground truth, so the user
         # decides whether to pay for it.
         "auto_sections": get_auto_sections(),
+        # Sheet-panel transcription for the next import, and the language it
+        # forces. The toggle clears when the page loads; the language stays.
+        "playalong": get_playalong(),
+        "playalong_language": get_playalong_language(),
         "auto_delete_days_min": AUTO_DELETE_DAYS_MIN,
         "auto_delete_days_max": AUTO_DELETE_DAYS_MAX,
         "max_duration_sec": get_max_duration_sec(),
@@ -450,6 +458,13 @@ async def update_settings(request: Request) -> dict[str, object]:
         set_auto_delete_jobs(bool(body["auto_delete_jobs"]))
     if "auto_sections" in body:
         set_auto_sections(bool(body["auto_sections"]))
+    if "playalong" in body:
+        set_playalong(bool(body["playalong"]))
+    if "playalong_language" in body:
+        try:
+            set_playalong_language(str(body["playalong_language"]))
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from None
     for key, setter in (
         ("auto_delete_days", set_auto_delete_days),
         ("max_duration_sec", set_max_duration_sec),
