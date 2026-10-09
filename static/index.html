@@ -1266,16 +1266,21 @@
           <span data-i18n="sheet.import">Next import</span>
         </button>
         <button class="sheet-transcribe" type="button" id="sheetTranscribe" data-i18n="sheet.transcribe">Transcribe</button>
+        <button class="sheet-chords-btn" type="button" id="sheetChords" title="Estimate chord symbols from the accompaniment. Approximate." data-i18n="sheet.findChords" data-i18n-title="sheet.findChordsTitle">Find chords</button>
+        <button class="sheet-import" type="button" id="sheetChordsImport" aria-pressed="false" title="Find chords on the next import. Turns off when you reload the page." data-i18n-title="sheet.chordsImportTitle">
+          <span data-i18n="sheet.chordsImport">Chords next import</span>
+        </button>
         <button class="sheet-close" type="button" id="sheetClose" aria-label="Close sheet" data-i18n-aria-label="sheet.close">&times;</button>
       </div>
       <p class="sheet-status" id="sheetStatus" aria-live="polite"></p>
+      <p class="sheet-chord-note" data-i18n="sheet.chordsNote">Chords are estimated and approximate. Click a symbol to correct it.</p>
       <div class="sheet-stage">
         <div class="sheet-slot sheet-slot-current">
-          <div class="sheet-chords" aria-hidden="true"></div>
+          <div class="sheet-chords" id="sheetChordsCurrent"></div>
           <p class="sheet-line" id="sheetCurrent"></p>
         </div>
         <div class="sheet-slot sheet-slot-next">
-          <div class="sheet-chords" aria-hidden="true"></div>
+          <div class="sheet-chords" id="sheetChordsNext"></div>
           <p class="sheet-line" id="sheetNext"></p>
         </div>
       </div>

@@ -25,6 +25,7 @@ from app.pipeline.analyze import analyze, refine_key_from_stems
 from app.pipeline.beatgrid import compute_beat_grid
 from app.pipeline.cancel import check_cancel as _check_cancel
 from app.pipeline.cancel import run_registered
+from app.pipeline.chords import detect_if_opted_in
 from app.pipeline.collect import (
     cleanup_source,
     collect,
@@ -319,6 +320,11 @@ def _run_with_band_lookup(job: Job, source: Path, job_dir: Path) -> None:
     mark = time.monotonic()
     transcribe_if_opted_in(job, job_dir)
     _lap(job, "playalong", mark)
+    # Opt-in chords. After the beat grid exists. Never raises but for a cancel,
+    # and a bad result is not written. Symbols the user already corrected stay.
+    mark = time.monotonic()
+    detect_if_opted_in(job, job_dir)
+    _lap(job, "chords", mark)
 
 
 def _run_blocking(job: Job, url: str, job_dir: Path) -> None:

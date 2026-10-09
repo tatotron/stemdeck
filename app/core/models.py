@@ -256,6 +256,11 @@ class Job:
     playalong: bool = False
     playalong_language: str = "auto"
     playalong_status: Literal["none", "running", "done", "error", "skipped"] = "none"
+    # Chord detection for the Sheet panel, captured at creation like playalong.
+    # A failure stays "error" and leaves any chords.json already saved; a
+    # symbol the user typed is flagged in that file and is not replaced.
+    chords: bool = False
+    chords_status: Literal["none", "running", "done", "error"] = "none"
     sections_source: Literal["automatic", "manual"] | None = None
     tags: list[str] | None = None  # YouTube tags + categories, lowercased, max 8
     stems: list[dict[str, str]] = field(default_factory=list)
@@ -416,6 +421,7 @@ class Job:
             "stage_timings": self.stage_timings,
             "vocal_split": self.vocal_split,
             "playalong_status": self.playalong_status,
+            "chords_status": self.chords_status,
             "trashed_at": self.trashed_at,
             "favorite": self.favorite,
             "created_at": self.created_at,

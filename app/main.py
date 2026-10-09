@@ -61,6 +61,7 @@ from app.core.settings import (
     get_auto_delete_days,
     get_auto_delete_jobs,
     get_auto_sections,
+    get_chords,
     get_cookies_file,
     get_demucs_device,
     get_demucs_device_choice,
@@ -79,6 +80,7 @@ from app.core.settings import (
     set_auto_delete_days,
     set_auto_delete_jobs,
     set_auto_sections,
+    set_chords,
     set_cookies_file,
     set_demucs_device,
     set_discogs_token,
@@ -369,6 +371,8 @@ def _settings_payload() -> dict[str, object]:
         # forces. The toggle clears when the page loads; the language stays.
         "playalong": get_playalong(),
         "playalong_language": get_playalong_language(),
+        # Chord symbols for the next import. The page clears this on load.
+        "chords": get_chords(),
         "auto_delete_days_min": AUTO_DELETE_DAYS_MIN,
         "auto_delete_days_max": AUTO_DELETE_DAYS_MAX,
         "max_duration_sec": get_max_duration_sec(),
@@ -460,6 +464,8 @@ async def update_settings(request: Request) -> dict[str, object]:
         set_auto_sections(bool(body["auto_sections"]))
     if "playalong" in body:
         set_playalong(bool(body["playalong"]))
+    if "chords" in body:
+        set_chords(bool(body["chords"]))
     if "playalong_language" in body:
         try:
             set_playalong_language(str(body["playalong_language"]))

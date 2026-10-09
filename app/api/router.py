@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from app.api.chords import router as chords_router
 from app.api.config import router as config_router
 from app.api.discogs import router as discogs_router
 from app.api.events import router as events_router
@@ -21,6 +22,7 @@ router.include_router(stems_router, tags=["stems"])
 router.include_router(qr_router, tags=["qr"])
 router.include_router(queue_router, prefix="/queue", tags=["queue"])
 router.include_router(playalong_router, tags=["playalong"])
+router.include_router(chords_router, tags=["chords"])
 router.include_router(playlist_router, prefix="/playlist", tags=["playlist"])
 router.include_router(search_router, prefix="/search", tags=["search"])
 router.include_router(discogs_router, prefix="/discogs", tags=["discogs"])

@@ -128,7 +128,37 @@
 .sheet-chords {
   min-height: 1.5em;
   margin: 0 0 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: flex-end;
 }
+.sheet-chord-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted-2, var(--muted));
+}
+.sheet-chord,
+.sheet-chord-input {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.sheet-chord { cursor: pointer; }
+.sheet-chord.user { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.sheet-slot-next .sheet-chord,
+.sheet-slot-next .sheet-chord-input { font-size: 13px; font-weight: 600; color: var(--muted); }
+.sheet-chord-input {
+  width: 7.5em;
+  border-bottom: 1px solid var(--accent);
+  border-radius: 0;
+}
+.sheet-chords-btn { margin-left: 0; }
 .sheet-slot-next .sheet-chords { min-height: 1.15em; }
 .sheet-line {
   margin: 0;

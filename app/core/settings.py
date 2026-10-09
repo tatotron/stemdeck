@@ -328,6 +328,21 @@ def set_playalong(value: bool) -> bool:
         return bool(value)
 
 
+def get_chords() -> bool:
+    """Find chords on the next import. Off until asked, and the page clears
+    it on load."""
+    with _LOCK:
+        v = _ensure().get("chords")
+        return v if isinstance(v, bool) else False
+
+
+def set_chords(value: bool) -> bool:
+    with _LOCK:
+        _ensure()["chords"] = bool(value)
+        _save()
+        return bool(value)
+
+
 _PLAYALONG_LANGUAGES = ("auto", "pt", "es", "en")
 
 

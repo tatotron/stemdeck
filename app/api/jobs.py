@@ -51,6 +51,7 @@ from app.core.registry import set_trashed as registry_set_trashed
 from app.core.settings import (
     get_acoustid_api_key,
     get_auto_sections,
+    get_chords,
     get_discogs_token,
     get_max_duration_sec,
     get_playalong,
@@ -267,6 +268,7 @@ async def _create_youtube_job(request: Request) -> dict[str, str]:
         auto_sections=get_auto_sections(),
         playalong=get_playalong(),
         playalong_language=get_playalong_language(),
+        chords=get_chords(),
     )
     if not registry_register_if_capacity(job, MAX_PENDING_URL_JOBS):
         raise HTTPException(status_code=503, detail=_URL_QUEUE_FULL_DETAIL)
@@ -368,6 +370,7 @@ async def _create_local_job(request: Request) -> dict[str, str]:
         auto_sections=get_auto_sections(),
         playalong=get_playalong(),
         playalong_language=get_playalong_language(),
+        chords=get_chords(),
     )
     if not registry_register_if_capacity(job, MAX_PENDING_UPLOAD_JOBS):
         shutil.rmtree(job_dir, ignore_errors=True)
@@ -683,6 +686,7 @@ async def resplit_job(job_id: str, body: ResplitBody) -> dict:
         auto_sections=get_auto_sections(),
         playalong=get_playalong(),
         playalong_language=get_playalong_language(),
+        chords=get_chords(),
     )
     if not registry_register_if_capacity(new_job, MAX_PENDING_UPLOAD_JOBS):
         shutil.rmtree(new_dir, ignore_errors=True)

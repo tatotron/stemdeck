@@ -16,11 +16,13 @@ const importEl = () => document.getElementById("sheetImportToggle");
 const transcribeEl = () => document.getElementById("sheetTranscribe");
 
 let lines = [];
+let chords = [];
 let lineIndex = -2;
 let words = [];
 let nextWords = [];
 let clockOn = false;
 let busy = false;
+let editing = false;
 let loadedFor = null;
 
 function isOpen() {
@@ -51,6 +53,86 @@ function paintWords(container, timed, now, wipe) {
   }
 }
 
+function chordsCovering(start, end) {
+  return chords.filter((c) => c.end > start + 0.02 && c.time < end - 0.02);
+}
+
+function paintChords(container, items) {
+  if (!container || editing) return;
+  container.replaceChildren();
+  for (const chord of items) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "sheet-chord" + (chord.user ? " user" : "");
+    button.textContent = chord.symbol;
+    button.title = t("sheet.chordsNote");
+    button.addEventListener("click", () => beginEdit(button, chord));
+    container.append(button);
+  }
+}
+
+function beginEdit(button, chord) {
+  if (editing || busy) return;
+  editing = true;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "sheet-chord-input";
+  input.value = chord.symbol;
+  input.setAttribute("aria-label", t("sheet.chordsNote"));
+  button.replaceWith(input);
+  input.focus();
+  input.select();
+  const finish = async (save) => {
+    if (!editing) return;
+    editing = false;
+    const typed = input.value.trim();
+    input.replaceWith(button);
+    if (!save || typed === chord.symbol) {
+      lineIndex = -2;
+      showLines(indexAt(transport()?.getCurrentTime?.() ?? 0), transport()?.getCurrentTime?.() ?? 0);
+      return;
+    }
+    const id = getCurrentTrackInfo()?.id;
+    if (!id) return;
+    try {
+      const r = await fetch(`/api/jobs/${id}/chords`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ time: chord.time, symbol: typed }),
+      });
+      if (r.status === 422) {
+        setStatus(t("sheet.chordInvalid"));
+      } else if (!r.ok) {
+        setStatus(t("sheet.chordsFailed"));
+      } else {
+        const saved = await r.json();
+        const found = chords.find((c) => c.time === chord.time);
+        if (found) {
+          found.symbol = saved.symbol;
+          found.user = true;
+        }
+        setStatus(t("sheet.chordSaved"));
+      }
+    } catch (e) {
+      console.warn("[sheet] could not save the chord:", e);
+      setStatus(t("sheet.chordsFailed"));
+    }
+    lineIndex = -2;
+    showLines(indexAt(transport()?.getCurrentTime?.() ?? 0), transport()?.getCurrentTime?.() ?? 0);
+  };
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void finish(true);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      void finish(false);
+    }
+  });
+  input.addEventListener("blur", () => void finish(true));
+}
+
 function showLines(index, now) {
   const current = document.getElementById("sheetCurrent");
   const next = document.getElementById("sheetNext");
@@ -64,6 +146,10 @@ function showLines(index, now) {
     nextWords = following ? wordTimings(following, after?.time ?? null) : [];
     if (!line) current.textContent = "";
     if (!following) next.textContent = "";
+    const currentEnd = following?.time ?? (line ? line.time + 8 : 0);
+    const nextEnd = after?.time ?? (following ? following.time + 8 : 0);
+    paintChords(document.getElementById("sheetChordsCurrent"), line ? chordsCovering(line.time, currentEnd) : []);
+    paintChords(document.getElementById("sheetChordsNext"), following ? chordsCovering(following.time, nextEnd) : []);
   }
   if (line) paintWords(current, words, now, true);
   else current.textContent = "";
@@ -132,6 +218,7 @@ async function load() {
   const id = getCurrentTrackInfo()?.id || "";
   if (id === loadedFor) return;
   lines = [];
+  chords = [];
   lineIndex = -2;
   if (!id) {
     loadedFor = "";
@@ -141,6 +228,7 @@ async function load() {
   }
   try {
     lines = await loadLyrics(id);
+    await reloadChords(id);
     loadedFor = id;
     lineIndex = -2;
     setStatus(lines.length ? (busy ? t("sheet.working") : "") : t("sheet.noLyrics"));
@@ -150,6 +238,43 @@ async function load() {
     setStatus(t("sheet.loadFailed"));
   }
   showLines(indexAt(transport()?.getCurrentTime?.() ?? 0), transport()?.getCurrentTime?.() ?? 0);
+}
+
+async function reloadChords(id) {
+  try {
+    const r = await fetch(`/api/jobs/${id}/chords`, { cache: "no-store" });
+    chords = r.ok ? (await r.json()).chords || [] : [];
+  } catch (e) {
+    console.warn("[sheet] could not read chords:", e);
+    chords = [];
+  }
+}
+
+async function findChords() {
+  const info = getCurrentTrackInfo();
+  const button = document.getElementById("sheetChords");
+  if (!info?.id || busy) return;
+  busy = true;
+  if (button) button.disabled = true;
+  setStatus(t("sheet.chordsWorking"));
+  try {
+    const r = await fetch(`/api/jobs/${info.id}/chords/detect`, { method: "POST" });
+    const body = r.ok ? await r.json() : null;
+    if (r.status === 409) setStatus(t("sheet.busy"));
+    else if (!r.ok || body?.chords_status === "error" || body?.ok === false) setStatus(t("sheet.chordsFailed"));
+    else {
+      chords = body?.chords || [];
+      setStatus(chords.length ? t("sheet.chordsDone") : t("sheet.chordsNone"));
+    }
+  } catch (e) {
+    console.warn("[sheet] chord detection failed:", e);
+    setStatus(t("sheet.chordsFailed"));
+  } finally {
+    busy = false;
+    if (button) button.disabled = false;
+    lineIndex = -2;
+    showLines(indexAt(transport()?.getCurrentTime?.() ?? 0), transport()?.getCurrentTime?.() ?? 0);
+  }
 }
 
 async function transcribe() {
@@ -195,8 +320,9 @@ export function initPlayalong() {
   document.getElementById("sheetCurrent")?.addEventListener("click", () => seek("current"));
   document.getElementById("sheetNext")?.addEventListener("click", () => seek("next"));
   transcribeEl()?.addEventListener("click", () => void transcribe());
+  document.getElementById("sheetChords")?.addEventListener("click", () => void findChords());
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && isOpen()) setOpen(false);
+    if (e.key === "Escape" && isOpen() && !e.target?.classList?.contains("sheet-chord-input")) setOpen(false);
   });
   document.addEventListener("trackopen", () => {
     loadedFor = null;
@@ -215,6 +341,24 @@ export function initPlayalong() {
       console.warn("[sheet] could not save the language:", e);
     } finally {
       select.disabled = false;
+    }
+  });
+
+  const chordsImportEl = () => document.getElementById("sheetChordsImport");
+  const paintChordsImport = (on) => chordsImportEl()?.setAttribute("aria-pressed", String(!!on));
+  chordsImportEl()?.addEventListener("click", async () => {
+    const button = chordsImportEl();
+    if (!button) return;
+    const next = button.getAttribute("aria-pressed") !== "true";
+    paintChordsImport(next);
+    button.disabled = true;
+    try {
+      paintChordsImport((await saveSetting({ chords: next })).chords);
+    } catch (e) {
+      console.warn("[sheet] could not save chord detection:", e);
+      paintChordsImport(!next);
+    } finally {
+      button.disabled = false;
     }
   });
 
@@ -245,12 +389,23 @@ export function initPlayalong() {
       const select = languageEl();
       if (select && d.playalong_language) select.value = d.playalong_language;
       paintImport(d.playalong);
+      const paintChordsImport = (on) =>
+        document.getElementById("sheetChordsImport")?.setAttribute("aria-pressed", String(!!on));
+      paintChordsImport(d.chords);
+      const clear = {};
       if (d.playalong) {
         paintImport(false);
+        clear.playalong = false;
+      }
+      if (d.chords) {
+        paintChordsImport(false);
+        clear.chords = false;
+      }
+      if (clear.playalong === false || clear.chords === false) {
         try {
-          await saveSetting({ playalong: false });
+          await saveSetting(clear);
         } catch (e) {
-          console.warn("[sheet] could not clear the import toggle:", e);
+          console.warn("[sheet] could not clear an import toggle:", e);
         }
       }
     })

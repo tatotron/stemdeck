@@ -25,6 +25,7 @@ from app.core.registry import persist as registry_persist
 from app.core.registry import register_if_capacity as registry_register_if_capacity
 from app.core.settings import (
     get_auto_sections,
+    get_chords,
     get_max_duration_sec,
     get_playalong,
     get_playalong_language,
@@ -150,6 +151,7 @@ async def create_playlist_jobs(request: Request) -> dict[str, Any]:
     auto_sections = get_auto_sections()
     playalong = get_playalong()
     playalong_language = get_playalong_language()
+    chords = get_chords()
     created: list[dict[str, Any]] = []
     for item in items:
         job = Job(
@@ -163,6 +165,7 @@ async def create_playlist_jobs(request: Request) -> dict[str, Any]:
             auto_sections=auto_sections,
             playalong=playalong,
             playalong_language=playalong_language,
+            chords=chords,
         )
         if not registry_register_if_capacity(job, MAX_PENDING_URL_JOBS):
             break  # queue filled up mid-loop; report what did land
